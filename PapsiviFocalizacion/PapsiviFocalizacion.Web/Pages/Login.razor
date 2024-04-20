@@ -1,0 +1,105 @@
+﻿@page "/"
+@layout LoginLayout
+
+<RadzenNotification />
+
+<br />
+
+<p style="text-align:center">
+</p>
+
+<h3 style="text-align:center;">
+    Aplicacion Tal . . . 
+</h3>
+
+<h3 style="text-align:center;">
+    Aplicacion Tal . . .
+</h3>
+
+<EditForm Model="_focUsuario" OnValidSubmit="@Loguear">
+    <DataAnnotationsValidator />
+
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">Usuario</label>
+            <div class="col-sm-6">
+                <RadzenTextBox class="form-control" @bind-Value="@_focUsuario.Usuario" />
+                <ValidationMessage For="@(() => _focUsuario.Usuario)" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">Contraseña</label>
+            <div class="col-sm-6">
+                <RadzenPassword class="form-control" @bind-Value="@_focUsuario.Contrasena" aria-label="enter password" />
+                <ValidationMessage For="@(() => _focUsuario.Contrasena)" />
+            </div>
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <div class="text-center">
+                <RadzenButton class="btn btn-primary" ButtonType="ButtonType.Submit" Text="Iniciar Sesión" />
+            </div>
+        </div>
+    </RadzenCard>
+</EditForm>
+
+@code {
+    FocUsuario _focUsuario = new();
+
+    public async Task Loguear()
+    {
+        var json = JsonConvert.SerializeObject(_focUsuario);
+        var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+        var httpResponse = await _http.PostAsync("Api/FocUsuario/Loguear", stringContent);
+
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            var responseContent = await httpResponse.Content.ReadAsStringAsync();
+            var usuario = JsonConvert.DeserializeObject<FocUsuario>(responseContent);
+
+            if (usuario != null && !string.IsNullOrEmpty(usuario.Nivel))
+            {
+                FocUsuarioDto.UsuarioId = usuario.UsuarioId;
+                FocUsuarioDto.Usuario = usuario.Usuario;
+                FocUsuarioDto.Nivel = usuario.Nivel;
+
+                if (FocUsuarioDto.Nivel == "ADMINISTRATIVO")
+                {
+                    NavigationManager.NavigateTo("/ConsultaAdministrativo");
+                }
+                else if(FocUsuarioDto.Nivel == "PROMOTOR")
+                {
+                    NavigationManager.NavigateTo("/Index");
+                }
+            }
+            else
+            {
+                ShowNotification(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "Papsivi Focalización",
+                        Detail = "Usuario o contraseña incorrectos",
+                        Duration = 5000
+                    });
+            }
+        }
+        else
+        {
+            ShowNotification(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Papsivi Focalización",
+                    Detail = "Ocurrió un error al intentar iniciar sesión. Por favor, inténtelo de nuevo más tarde.",
+                    Duration = 5000
+                });
+        }
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+}

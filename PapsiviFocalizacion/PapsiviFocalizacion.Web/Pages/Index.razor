@@ -1,0 +1,270 @@
+﻿@page "/Index"
+
+<RadzenNotification />
+
+<h3 style="text-align: center;">Cargar archivo</h3>
+
+<EditForm Model="@_localizacion">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 1200px;">
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label>Departamento</label>
+                    <RadzenDropDown TValue="int" Data="_lstFocDepartamentos"
+                                    TextProperty="Departamento" ValueProperty="DepartamentoId"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    @bind-Value="@_selectedDepartamentoId" Change="@(args => OnChangeDepartamento(_selectedDepartamentoId))" class="w-100" />
+                    @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label>Municipio</label>
+                    <RadzenDropDown TValue="int" Data="_lstFocMunicipios"
+                                    TextProperty="Municipio" ValueProperty="MunicipioId"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    @bind-Value="@_selectedMunicipioId" Change="@(args => OnChangeMunicipio(_selectedDepartamentoId))" class="w-100" />
+                    @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label>Ese</label>
+                    <RadzenDropDown TValue="int" Data="_lstFocEses"
+                                    TextProperty="Ese" ValueProperty="EseId"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    @bind-Value="@_selectedEseId" Change="@(args => OnChangeEse(_selectedMunicipioId))" class="w-100" />
+                    @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label>Resolución</label>
+                    <RadzenDropDown TValue="int" Data="_lstFocResolucion"
+                                    TextProperty="Resolucion" ValueProperty="ResolucionId"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    @bind-Value="@_selectedResolucionId" class="w-100" />
+                    @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                </div>
+            </div>
+        </div>
+    </RadzenCard>
+
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 1200px;">
+        <InputFile OnChange="@ImportExcelFile" accept=".xlsx" multiple="false"></InputFile>
+        <br />
+        <div class="form-group">
+            <div class="text-center">
+                <RadzenButton class="btn btn-primary" ButtonType="ButtonType.Submit" Text="Guardar" Click="@GuardarMasivo" />
+            </div>
+        </div>
+    </RadzenCard>
+
+</EditForm>
+
+@code {
+    Localizacion _localizacion = new();
+
+    List<FocDepartamento> _lstFocDepartamentos;
+    FocDepartamento _focDepartamento = new();
+
+    List<FocMunicipio> _lstFocMunicipios;
+    FocMunicipio _focMunicipio = new();
+
+    List<FocEse> _lstFocEses;
+    FocusEventArgs _focEse = new();
+
+    List<Focalizacion> _lstFocalizacion = new();
+    Focalizacion _focalizacion = new();
+
+    List<FocResolucion> _lstFocResolucion = new();
+    FocResolucion focResolucion = new();
+
+    int _selectedDepartamentoId;
+    int _selectedMunicipioId;
+    int _selectedEseId;
+    int _selectedResolucionId;
+
+    ElementReference fileInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarDepartamentos();
+        await ConsultarResolucion();
+    }
+
+    public async Task ConsultarDepartamentos()
+    {
+        var response = await _http.GetFromJsonAsync<List<FocDepartamento>>($"Api/FocDepartamento/ConsultarDepartamentos");
+
+        if (response != null)
+        {
+            _lstFocDepartamentos = response;
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeDepartamento(int departamentoId)
+    {
+        await OnChangeMunicipio(departamentoId);
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeMunicipio(int departamentoId)
+    {
+        var response = await _http.GetFromJsonAsync<List<FocMunicipio>>($"Api/FocMunicipio/ConsultarMunicipios/{departamentoId}");
+
+        if (response != null)
+        {
+            _lstFocMunicipios = response;
+        }
+
+        await OnChangeEse(_selectedMunicipioId);
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeEse(int municipioId)
+    {
+        var response = await _http.GetFromJsonAsync<List<FocEse>>($"Api/FocEse/ConsultarEses/{municipioId}");
+
+        if (response != null)
+        {
+            _lstFocEses = response;
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task ConsultarResolucion()
+    {
+        var response = await _http.GetFromJsonAsync<List<FocResolucion>>("Api/FocResolucion/ConsultarResolucion");
+
+        if (response != null)
+        {
+            _lstFocResolucion = response;
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeResolucion(int resolucionId)
+    {
+        _selectedResolucionId = resolucionId;
+    }
+
+    public async Task ImportExcelFile(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            try
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    await file.OpenReadStream().CopyToAsync(ms);                    
+                    ms.Position = 0;
+
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    using (ExcelPackage package = new ExcelPackage(ms))
+                    {
+                        ExcelWorksheet ws = package.Workbook.Worksheets.FirstOrDefault();
+                        int rowCount = ws.Dimension.End.Row;
+
+                        for (int row = 2; row <= rowCount; row++)
+                        {
+                            Focalizacion focalizacion = new Focalizacion
+                            {
+                                FechaContacto = DateTime.Parse(ws.Cells[row, 1].Value.ToString()), 
+                                TipoDoc = ws.Cells[row, 2].Value?.ToString(),
+                                NumeroId = ws.Cells[row, 3].Value?.ToString(),
+                                Nombre1 = ws.Cells[row, 4].Value?.ToString(),
+                                Nombre2 = ws.Cells[row, 5].Value?.ToString(),
+                                Apellido1 = ws.Cells[row, 6].Value?.ToString(),
+                                Apellido2 = ws.Cells[row, 7].Value?.ToString(),
+                                FechaNacimiento = DateTime.Parse(ws.Cells[row, 8].Value.ToString()), 
+                                Direccion = ws.Cells[row, 9].Value?.ToString(),
+                                TelefonosContacto = ws.Cells[row, 10].Value?.ToString(),
+                                TelefonoEfectivo = ws.Cells[row, 11].Value?.ToString(),
+                                Aceptacion_o_no_atencion = ws.Cells[row, 12].Value?.ToString(),
+                                Atencion__la_que_accede = ws.Cells[row, 13].Value?.ToString(),
+                                Razon_no_aceptacion = ws.Cells[row, 14].Value?.ToString(),
+                                Incluido_ruv_o_sentencias = ws.Cells[row, 15].Value?.ToString(),
+                                Verificacion_estado_aseguramiento = ws.Cells[row, 16].Value?.ToString(),
+                                Eps = ws.Cells[row, 17].Value?.ToString(),
+                                Condicion_discapacidad = ws.Cells[row, 18].Value?.ToString(),
+                                Pertenencia_etnica = ws.Cells[row, 19].Value?.ToString(),
+                                Sexo = ws.Cells[row, 20].Value?.ToString(),
+                                Observaciones = ws.Cells[row, 21].Value?.ToString(),
+                                EseId = _selectedEseId,
+                                UsuarioId = FocUsuarioDto.UsuarioId,
+                                ResolucionId = _selectedResolucionId
+                            };
+
+                            _lstFocalizacion.Add(focalizacion);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al importar el archivo Excel", ex);
+            }
+        }
+    }
+
+    private async Task GuardarMasivo()
+    {
+        _localizacion.LstFocalizacion = _lstFocalizacion;
+
+        var json = JsonConvert.SerializeObject(_lstFocalizacion);
+        var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+        var httpResponse = await _http.PostAsync("Api/Focalizacion/GuardarMasivo", stringContent);
+
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            var responseContent = await httpResponse.Content.ReadAsStringAsync();
+            var rows = JsonConvert.DeserializeObject<int>(responseContent);
+
+            if (rows >= 1)
+            {
+                ShowNotification(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Papsivi Focalización",
+                        Detail = $"Se almacenarón exitosamente {rows} registros del archivo",
+                        Duration = 5000
+                    });
+            }
+            else
+            {
+                ShowNotification(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "Papsivi Focalización",
+                        Detail = $"No se almacenó la informacion del archivo, verifique que los datos esten completos y con el correcto formato para cada campo",
+                        Duration = 5000
+                    });
+            }
+        }
+        else
+        {
+            ShowNotification(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Papsivi Focalización",
+                    Detail = "No se almacenó la informacion del archivo, verifique que los datos esten completos y con el correcto formato para cada campo",
+                    Duration = 5000
+                });
+        }
+
+        _lstFocalizacion.Clear();
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+
+}

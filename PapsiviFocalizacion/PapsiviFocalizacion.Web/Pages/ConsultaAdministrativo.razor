@@ -1,0 +1,215 @@
+﻿@page "/ConsultaAdministrativo"
+
+<h3 style="text-align: center;">Consulta general de administrativo</h3>
+
+@if (_lstFocalizacionView == null)
+{
+    <div class="d-flex justify-content-center">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+            <Template>Wait</Template>
+        </RadzenProgressBarCircular>
+    </div>
+}
+else
+{
+    <EditForm Model="@_localizacion">
+        <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 1200px;">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Departamento</label>
+                        <RadzenDropDown TValue="int" Data="_lstFocDepartamentos"
+                                        TextProperty="Departamento" ValueProperty="DepartamentoId"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        @bind-Value="@_selectedDepartamentoId" Change="@(args => OnChangeDepartamento(_selectedDepartamentoId))" class="w-100" />
+                        @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label>Municipio</label>
+                        <RadzenDropDown TValue="int" Data="_lstFocMunicipios"
+                                        TextProperty="Municipio" ValueProperty="MunicipioId"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        @bind-Value="@_selectedMunicipioId" Change="@(args => OnChangeMunicipio(_selectedDepartamentoId))" class="w-100" />
+                        @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label>Ese</label>
+                        <RadzenDropDown TValue="int" Data="_lstFocEses"
+                                        TextProperty="Ese" ValueProperty="EseId"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        @bind-Value="@_selectedEseId" Change="@(args => OnChangeEse(_selectedMunicipioId))" class="w-100" />
+                        @*<ValidationMessage For="@(() => _focDepartamento.DepartamentoId)" />*@
+                    </div>
+                </div>
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <div class="text-center">
+                    <RadzenButton class="btn btn-primary" ButtonType="ButtonType.Submit" Text="Consultar" Click="@ConsultarMasivo" />
+                </div>
+            </div>
+
+            <br />
+
+            <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" PageSize="10" AllowPaging="true" AllowSorting="false"
+                            Data="@_lstFocalizacionView" TItem="FocalizacionView" ColumnWidth="150px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" EmptyText="No se encontraron registros.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="FechaLog" Title="FechaLog">
+                        <Template Context="focalizacion">
+                            @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaLog)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Usuario" Title="Usuario" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Nivel" Title="Nivel" />
+
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Resolucion" Title="Resolucion" />
+
+                    @*<RadzenDataGridColumn TItem="FocalizacionView" Property="FocalizacionId" Title="ID" />*@
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="FechaContacto" Title="Fecha de Contacto">
+                        <Template Context="focalizacion">
+                            @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaContacto)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="TipoDoc" Title="Tipo de Documento" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="NumeroId" Title="Número de Identificación" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Nombre1" Title="Primer Nombre" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Nombre2" Title="Segundo Nombre" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Apellido1" Title="Primer Apellido" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Apellido2" Title="Segundo Apellido" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="FechaNacimiento" Title="Fecha de Nacimiento">
+                        <Template Context="focalizacion">
+                            @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaNacimiento)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Direccion" Title="Dirección" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="TelefonosContacto" Title="Teléfonos de Contacto" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="TelefonoEfectivo" Title="Teléfono Efectivo" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Aceptacion_o_no_atencion" Title="Aceptación o No Atención" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Atencion__la_que_accede" Title="Atención a la que Accede" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Razon_no_aceptacion" Title="Razón de No Aceptación" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Incluido_ruv_o_sentencias" Title="Incluido en RUV o Sentencias" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Verificacion_estado_aseguramiento" Title="Verificación Estado Aseguramiento" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Eps" Title="EPS" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Condicion_discapacidad" Title="Condición de Discapacidad" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Pertenencia_etnica" Title="Pertenencia Étnica" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Sexo" Title="Sexo" />
+                    <RadzenDataGridColumn TItem="FocalizacionView" Property="Observaciones" Title="Observaciones" />                    
+                </Columns>
+            </RadzenDataGrid>
+
+        </RadzenCard>
+    </EditForm>
+
+    @*<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 1200px;">*@
+        
+
+    @*</RadzenCard>*@
+}
+
+@code {
+    Localizacion _localizacion = new();
+
+    List<FocDepartamento> _lstFocDepartamentos;
+    FocDepartamento _focDepartamento = new();
+
+    List<FocMunicipio> _lstFocMunicipios;
+    FocMunicipio _focMunicipio = new();
+
+    List<FocEse> _lstFocEses;
+    FocusEventArgs _focEse = new();
+
+    List<FocalizacionView> _lstFocalizacionView = new();
+    FocalizacionView _focalizacionView = new();
+
+    int _selectedDepartamentoId;
+    int _selectedMunicipioId;
+    int _selectedEseId;
+
+    FocalizacionFiltro focalizacionFiltro = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarDepartamentos();
+    }
+
+    public async Task ConsultarDepartamentos()
+    {
+        var response = await _http.GetFromJsonAsync<List<FocDepartamento>>($"Api/FocDepartamento/ConsultarDepartamentos");
+
+        if (response != null)
+        {
+            _lstFocDepartamentos = response;
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeDepartamento(int departamentoId)
+    {
+        await OnChangeMunicipio(departamentoId);
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeMunicipio(int departamentoId)
+    {
+        var response = await _http.GetFromJsonAsync<List<FocMunicipio>>($"Api/FocMunicipio/ConsultarMunicipios/{departamentoId}");
+
+        if (response != null)
+        {
+            _lstFocMunicipios = response;
+        }
+
+        await OnChangeEse(_selectedMunicipioId);
+
+        StateHasChanged();
+    }
+
+    public async Task OnChangeEse(int municipioId)
+    {
+        var response = await _http.GetFromJsonAsync<List<FocEse>>($"Api/FocEse/ConsultarEses/{municipioId}");
+
+        if (response != null)
+        {
+            _lstFocEses = response;
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task ConsultarMasivo()
+    {
+        focalizacionFiltro.DepartamentoId = _selectedDepartamentoId;
+        focalizacionFiltro.MunicipioId = _selectedMunicipioId;
+        focalizacionFiltro.EseId = _selectedEseId;
+
+        var json = JsonConvert.SerializeObject(focalizacionFiltro);
+        var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+        var httpResponse = await _http.PostAsync("Api/Focalizacion/ConsultarMasivo", stringContent);
+
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            var responseContent = await httpResponse.Content.ReadAsStringAsync();
+            _lstFocalizacionView = JsonConvert.DeserializeObject<List<FocalizacionView>>(responseContent);
+        }
+        else
+        {
+            
+        }
+
+        StateHasChanged();
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+
+}

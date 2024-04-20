@@ -1,0 +1,80 @@
+﻿@page "/ConsultaPromotor"
+
+<h3 style="text-align: center;">Consulta general de promotor</h3>
+
+@if (_lstFocalizacion == null)
+{
+    <div class="d-flex justify-content-center">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+            <Template>Wait</Template>
+        </RadzenProgressBarCircular>
+    </div>
+}
+else
+{
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 1200px;">
+        <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" PageSize="10" AllowPaging="true" AllowSorting="false"
+                        Data="@_lstFocalizacion" TItem="Focalizacion" ColumnWidth="150px"
+                        LogicalFilterOperator="LogicalFilterOperator.Or" EmptyText="No se encontraron registros.">
+            <Columns>
+                <RadzenDataGridColumn TItem="Focalizacion" Property="FechaLog" Title="FechaLog">
+                    <Template Context="focalizacion">
+                        @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaLog)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Focalizacion" Property="FechaContacto" Title="Fecha de Contacto">
+                    <Template Context="focalizacion">
+                        @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaContacto)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Focalizacion" Property="TipoDoc" Title="Tipo de Documento" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="NumeroId" Title="Número de Identificación" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Nombre1" Title="Primer Nombre" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Nombre2" Title="Segundo Nombre" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Apellido1" Title="Primer Apellido" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Apellido2" Title="Segundo Apellido" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="FechaNacimiento" Title="Fecha de Nacimiento">
+                    <Template Context="focalizacion">
+                        @string.Format("{0:dd/MM/yyyy}", focalizacion.FechaNacimiento)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Direccion" Title="Dirección" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="TelefonosContacto" Title="Teléfonos de Contacto" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="TelefonoEfectivo" Title="Teléfono Efectivo" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Aceptacion_o_no_atencion" Title="Aceptación o No Atención" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Atencion__la_que_accede" Title="Atención a la que Accede" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Razon_no_aceptacion" Title="Razón de No Aceptación" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Incluido_ruv_o_sentencias" Title="Incluido en RUV o Sentencias" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Verificacion_estado_aseguramiento" Title="Verificación Estado Aseguramiento" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Eps" Title="EPS" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Condicion_discapacidad" Title="Condición de Discapacidad" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Pertenencia_etnica" Title="Pertenencia Étnica" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Sexo" Title="Sexo" />
+                <RadzenDataGridColumn TItem="Focalizacion" Property="Observaciones" Title="Observaciones" />                
+            </Columns>
+        </RadzenDataGrid>
+
+        </RadzenCard>
+}
+
+@code {
+    List<Focalizacion> _lstFocalizacion;
+    Focalizacion _focalizacion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarMasivo(FocUsuarioDto.UsuarioId);
+    }
+
+    public async Task ConsultarMasivo(int usuarioId)
+    {
+        var response = await _http.GetFromJsonAsync<List<Focalizacion>>($"Api/Focalizacion/ConsultarMasivo/{usuarioId}");
+
+        if (response != null)
+        {
+            _lstFocalizacion = response;
+        }
+
+        StateHasChanged();
+    }
+}

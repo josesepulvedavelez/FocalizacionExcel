@@ -1,0 +1,49 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">PapsiviFocalizacion.Web</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+
+        @if (FocUsuarioDto.Nivel == "ADMINISTRATIVO")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="ConsultaAdministrativo">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Consultar
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/Index" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+        
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="ConsultaPromotor">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Consultar
+                </NavLink>
+            </div>            
+        }        
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
